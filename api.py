@@ -1,3 +1,5 @@
+import os
+
 import requests
 from datetime import datetime
 
@@ -26,7 +28,7 @@ from datetime import datetime
 
 # with open("api_key.txt", "r") as f:
 #     api_key = f.read().strip()
-api_key = ''
+api_key = os.environ.get("api_key")
 
 def get_api(spot, interval="1h", repeat=0, model="ww3-gfs.global"):
     resp = requests.post('https://forecast-v2.metoceanapi.com/point/time',
