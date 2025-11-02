@@ -23,8 +23,10 @@ from datetime import datetime
 # print(resp.json())
 # # print just values of wave height:
 # print(resp.json()['variables']['wave.height']['data'])
-with open("api_key.txt", "r") as f:
-    api_key = f.read().strip()
+
+# with open("api_key.txt", "r") as f:
+#     api_key = f.read().strip()
+api_key = ''
 
 def get_api(spot, interval="1h", repeat=0, model="ww3-gfs.global"):
     resp = requests.post('https://forecast-v2.metoceanapi.com/point/time',
