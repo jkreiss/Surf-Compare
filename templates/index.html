@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Surf Forecast</title>
+</head>
+<body>
+    <h1>Surf Compare</h1>
+
+    <div class="buttons">
+        {% for spot in spots %}
+        <button onclick="loadForecast('{{ spot }}')">{{ spot }}</button>
+        {% endfor %}
+    </div>
+
+    <div id="buoy"><p>Loading buoy data...</p></div>
+
+    <script>
+    // Load buoy data
+    async function loadBuoy() {
+        const res = await fetch('/buoy');
+        const data = await res.json();
+        const buoy = data[0];
+        document.getElementById('buoy').innerHTML = `
+            <h2>Buoy data</h2>
+            <table>
+                <tr><td>Direction</td><td>${buoy.direction}</td><td>deg</td></tr>
+                <tr><td>Wave Height</td><td>${buoy.wave_height}</td><td>m</td></tr>
+                <tr><td>Max Wave Height</td><td>${buoy.max_wave_height}</td><td>m</td></tr>
+                <tr><td>Wave Period</td><td>${buoy.wave_period}</td><td>s</td></tr>
+            </table>
+        `;
+    }
+    loadBuoy();
+    async function loadForecast(spot) {
+        const container = document.getElementById("forecast");
+        container.innerHTML = "<p>Loading forecasts...</p>";
+
+        const resGFS = await fetch(`/forecast/gfs/${spot}`);
+        const dataGFS = await resGFS.json();
+
+        let html = `<h2>GFS for ${dataGFS.spot}</h2>`;
+        html += `<table>`;
+        for (const [key, val] of Object.entries(dataGFS.forecast)) {
+            html += `<tr>
+                        <td>${key}</td>
+                        <td>${val.data[0]!== null ? val.data[0].toFixed(2) : 'No data'}</td>
+                        <td>${val.units}</td>
+                     </tr>`;
+        }
+        html += `</table>`;
+
+        // make sure its ecmwf not ecwmf!!
+        const resECMWF = await fetch(`/forecast/ecmwf/${spot}`);
+        const dataECMWF = await resECMWF.json();
+        html += `<h2>ECMWF for ${dataECMWF.spot}</h2>`;
+        html += `<table>`;
+        for (const [key, val] of Object.entries(dataECMWF.forecast)) {
+            html += `<tr>
+                        <td>${key}</td>
+                        <td>${val.data[0] !== null ? val.data[0].toFixed(2) : 'No data'}</td>
+                        <td>${val.units}</td>
+                     </tr>`;
+        }
+        html += `</table>`;
+
+        container.innerHTML = html;
+    }
+    </script>
+
+    <div id="forecast" class="forecast"></div>
+</body>
+</html>
